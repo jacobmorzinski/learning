@@ -1,0 +1,5 @@
+See file:///C:/Users/Jacob/Documents/GitHub/learning/gradle-native/build/tmp/linkMainExecutable/output.txt for all output for linkMainExecutable.
+linking main.exe failed.
+LINK : fatal error LNK1104: cannot open file 'libucrt.lib'
+
+Finished linkMainExecutable, see full log file:///C:/Users/Jacob/Documents/GitHub/learning/gradle-native/build/tmp/linkMainExecutable/output.txt.

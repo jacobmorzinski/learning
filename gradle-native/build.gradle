@@ -1,0 +1,32 @@
+// You can build with "./gradlew" (or "gradlew.bat")
+// For more information about Gradle see
+// https://docs.gradle.org/current/userguide/userguide.html
+
+apply plugin: 'c'
+
+model {
+    platforms {
+        x64 { architecture "x64" }
+        x86 { architecture "x86" }
+    }
+    components {
+        main(NativeExecutableSpec) {
+            targetPlatform "x64"
+        }
+    }
+}
+
+defaultTasks 'build'
+
+task wrapper(type: Wrapper) {
+    description = "Updates gradlew and supporting files."
+    gradleVersion = "2.9"
+    // The default distributionUrl is:
+    // http://services.gradle.org/distributions/gradle-${gradleVersion}-bin.zip
+    //
+    // By changing to the "all", distribution, IDEs have access to 
+    // source code to help with code completion.
+    distributionUrl="https://services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
+}
+
+// vim:shiftwidth=4:tabstop=4:expandtab:filetype=groovy

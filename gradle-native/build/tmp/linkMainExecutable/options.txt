@@ -1,0 +1,5 @@
+/OUT:C:\Users\Jacob\Documents\GitHub\learning\gradle-native\build\binaries\mainExecutable\main.exe
+/NOLOGO
+"/LIBPATH:C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\lib\amd64"
+"/LIBPATH:C:\Program Files (x86)\Windows Kits\8.1\Lib\winv6.3\um\x64"
+C:\Users\Jacob\Documents\GitHub\learning\gradle-native\build\objs\mainExecutable\mainC\eio38jmbbr8sx8wacq8kmvz9l\helloworld.obj

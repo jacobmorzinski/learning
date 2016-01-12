@@ -1,0 +1,7 @@
+/TC
+/nologo
+/c
+/IC:\Users\Jacob\Documents\GitHub\learning\gradle-native\src\main\headers
+"/IC:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\include"
+"/IC:\Program Files (x86)\Windows Kits\8.1\Include\shared"
+"/IC:\Program Files (x86)\Windows Kits\8.1\Include\um"

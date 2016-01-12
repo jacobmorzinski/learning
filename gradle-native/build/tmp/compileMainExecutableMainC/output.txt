@@ -1,0 +1,5 @@
+See file:///C:/Users/Jacob/Documents/GitHub/learning/gradle-native/build/tmp/compileMainExecutableMainC/output.txt for all output for compileMainExecutableMainC.
+compiling helloworld.c successful.
+helloworld.c
+
+Finished compileMainExecutableMainC, see full log file:///C:/Users/Jacob/Documents/GitHub/learning/gradle-native/build/tmp/compileMainExecutableMainC/output.txt.
