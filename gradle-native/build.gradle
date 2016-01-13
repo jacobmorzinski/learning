@@ -12,6 +12,26 @@ model {
     components {
         main(NativeExecutableSpec) {
             targetPlatform "x64"
+            binaries.all {
+                if (toolChain in VisualCpp) {
+                    cCompiler.define 'NDEBUG'
+                    cCompiler.args "/IC:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\INCLUDE",
+                            "/IC:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\ATLMFC\\INCLUDE",
+                            "/IC:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.10240.0\\ucrt",
+                            "/IC:\\Program Files (x86)\\Windows Kits\\NETFXSDK\\4.6.1\\include\\um",
+                            "/IC:\\Program Files (x86)\\Windows Kits\\8.1\\include\\\\shared",
+                            "/IC:\\Program Files (x86)\\Windows Kits\\8.1\\include\\\\um",
+                            "/IC:\\Program Files (x86)\\Windows Kits\\8.1\\include\\\\winrt"
+                    linker.args '/RELEASE',
+                            "/LIBPATH:C:/WINDOWS/Microsoft.NET/Framework64/v4.0.30319",
+                            "/LIBPATH:C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/LIB/amd64",
+                            "/LIBPATH:C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/ATLMFC/LIB/amd64",
+                            "/LIBPATH:C:/Program Files (x86)/Windows Kits/8.1/References/CommonConfiguration/Neutral;/Microsoft.VCLibs/14.0/References/CommonConfiguration/neutral",
+                            "/LIBPATH:C:/Program Files (x86)/Windows Kits/10/lib/10.0.10240.0/ucrt/x64",
+                            "/LIBPATH:C:/Program Files (x86)/Windows Kits/NETFXSDK/4.6.1/lib/um/x64",
+                            "/LIBPATH:C:/Program Files (x86)/Windows Kits/8.1/lib/winv6.3/um/x64"
+                }
+            }
         }
     }
 }
@@ -24,9 +44,9 @@ task wrapper(type: Wrapper) {
     // The default distributionUrl is:
     // http://services.gradle.org/distributions/gradle-${gradleVersion}-bin.zip
     //
-    // By changing to the "all", distribution, IDEs have access to 
+    // By changing to the "all", distribution, IDEs have access to
     // source code to help with code completion.
-    distributionUrl="https://services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
+    distributionUrl = "https://services.gradle.org/distributions/gradle-${gradleVersion}-all.zip"
 }
 
 // vim:shiftwidth=4:tabstop=4:expandtab:filetype=groovy
