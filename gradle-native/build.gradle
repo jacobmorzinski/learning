@@ -15,13 +15,13 @@ model {
             binaries.all {
                 if (toolChain in VisualCpp) {
                     cCompiler.define 'NDEBUG'
-                    cCompiler.args "/IC:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\INCLUDE",
-                            "/IC:\\Program Files (x86)\\Microsoft Visual Studio 14.0\\VC\\ATLMFC\\INCLUDE",
-                            "/IC:\\Program Files (x86)\\Windows Kits\\10\\include\\10.0.10240.0\\ucrt",
-                            "/IC:\\Program Files (x86)\\Windows Kits\\NETFXSDK\\4.6.1\\include\\um",
-                            "/IC:\\Program Files (x86)\\Windows Kits\\8.1\\include\\\\shared",
-                            "/IC:\\Program Files (x86)\\Windows Kits\\8.1\\include\\\\um",
-                            "/IC:\\Program Files (x86)\\Windows Kits\\8.1\\include\\\\winrt"
+                    cCompiler.args "/IC:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/INCLUDE",
+                            "/IC:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/ATLMFC/INCLUDE",
+                            "/IC:/Program Files (x86)/Windows Kits/10/include/10.0.10240.0/ucrt",
+                            "/IC:/Program Files (x86)/Windows Kits/NETFXSDK/4.6.1/include/um",
+                            "/IC:/Program Files (x86)/Windows Kits/8.1/include/shared",
+                            "/IC:/Program Files (x86)/Windows Kits/8.1/include/um",
+                            "/IC:/Program Files (x86)/Windows Kits/8.1/include/winrt"
                     linker.args '/RELEASE',
                             "/LIBPATH:C:/WINDOWS/Microsoft.NET/Framework64/v4.0.30319",
                             "/LIBPATH:C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/LIB/amd64",
