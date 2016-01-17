@@ -23,15 +23,21 @@ fun main(args: Array<String>) {
     streamingSizeOf(p)
 }
 
+// Is there any difference?
+// Should I use File#getLength, which ends up calling DefaultFileSystem.getFileSystem().getLength(this)
+// Or use Files.size(), which ends up calling getFileSystem().provider().readAttributes(BasicFileAttributes.class).size()
+// Are reparse tags treated like symbolic links?
+
+
 fun streamingSizeOf(p: Path) {
     println("Working on $p")
     if (Files.isDirectory(p)) {
         println("is directory $p")
-        val stream: Stream<Path> = Files.list(p) ?: return
-        val siz = stream
+        val dir_stream: Stream<Path> = Files.list(p) ?: return
+        val siz = dir_stream
                     .mapToLong { i: Path -> Files.size(i) }
                     .sum()
-        stream.close()
+        dir_stream.close()
         println(siz)
     } else if (Files.isRegularFile(p)) {
         println("is regular file $p")
