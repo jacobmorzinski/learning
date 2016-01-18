@@ -1,15 +1,18 @@
 (ns jdirstat.core
-  (:import [java.nio.file FileSystems
+  (:import (java.io IOException)
+           (java.nio.file FileSystems
                           FileSystem
                           Files
                           FileStore
                           LinkOption
                           Path
-                          FileVisitor AccessMode]
+                          FileVisitor
+                          AccessMode
+                          AccessDeniedException
+                          NoSuchFileException)
            (java.nio.file.attribute BasicFileAttributes
                                     DosFileAttributes)
-           (java.nio.file.spi FileSystemProvider)
-           (sun.nio.fs WindowsFileAttributes))
+           (java.nio.file.spi FileSystemProvider))
   (:gen-class))
 
 (defn getFS
@@ -41,7 +44,7 @@
 (def fs (getFS))
 
 (-> fs
-    (.getPath "C:" (into-array String ["Users" "Jacob" "vimfiles"]))
+    (.getPath "C:\\" (into-array String ["Users" "Jacob" "vimfiles"]))
     .toFile
     .listFiles
     seq)
@@ -62,13 +65,42 @@
   ([fs x & xs]
    (.getPath fs x (into-array String xs))))
 
-(def c (get-path fs "C:"))
+(def c (get-path fs "C:\\"))
 
 ; Attribute views
 (def attribute-views (.supportedFileAttributeViews fs))
+
 ; Result on Windows: => #{"owner" "dos" "acl" "basic" "user"}
 ; Both "dos" and  "basic" have size information,
 ; as well as "isRegularFile", "isOther", etc.
+
+; Maybe I should get OS-specific attributes...
+; like "dos:*" on Windows
+(defn get-attrs
+  "Get attributes of a filesystem item.  Don't follow links.
+  Optional arg v can be a supported attribute view, i.e \"dos\" or \"unix\""
+  ([f] (get-attrs f "basic"))
+  ([f v] {:path f
+          :attrs (Files/readAttributes f (str v ":*") lo-nofollow)}))
+
+(get-attrs c "dos")
+
+;Any way to make this lazy?
+;need a more elegant filter.
+;TODO: catch get-attrs exceptions inside get-attrs
+(defn get-dirstream
+  [f]
+  (try
+    (with-open [s (Files/newDirectoryStream f)]
+      (->> s
+           .iterator
+           iterator-seq
+           (map get-attrs)
+           (filter #(get-in % [:attrs "isRegularFile"]))
+           doall))
+    (catch AccessDeniedException _ ())))
+
+(get-dirstream my-music)
 
 ;; For the "My Music" that was giving me errors,
 ;; "isOther" is true (and I wonder what the "attributes" means)
@@ -96,34 +128,74 @@
 (def access-mode (into-array AccessMode [AccessMode/READ]))
 (.checkAccess provider c access-mode)
 ;=>nil (success?)
-(.checkAccess provider my-music access-mode)
+(def my-music (get-path fs "C:\\"
+                        "Users" "Jacob"
+                        "Documents" "My Music"))
+(try (.checkAccess provider my-music access-mode)
+     (catch AccessDeniedException e e))
 ;=> AccessDeniedException
-(.checkAccess provider dropbox access-mode)
+(def dropbox (get-path fs "C:\\"
+                       "Users" "Jacob"
+                       "Dropbox"))
+(try (.checkAccess provider dropbox access-mode)
+     (catch NoSuchFileException e e))
 ;=>NoSuchFileException
 ; The Files/isReadable calls checkAccess in a try block
 ; and monitors for any generic IO exception
+
+
+;(WindowsPath$WindowsPathWithAttributes)
+
+;(-> (Files/list dropbox)
+;    .iterator
+;    iterator-seq
+;    first
+;    (.toRealPath lo-empty))
+;=> #<WindowsPath C:\Users\Jacob\Dropbox (Personal)\.dropbox>
+;(-> (Files/list dropbox)
+;    .iterator
+;    iterator-seq
+;    first
+;    (.toRealPath lo-nofollow))
+;=> #<WindowsPath C:\Users\Jacob\Dropbox\.dropbox>
+
+;(.toRealPath dropbox lo-empty)
+;=> #<WindowsPath C:\Users\Jacob\Dropbox (Personal)>
+;(.toRealPath dropbox lo-nofollow)
+;=> #<WindowsPath C:\Users\Jacob\Dropbox>
+
+;(-> dropbox                ;Path
+;    (Files/list)           ;java stream
+;    .iterator              ;java iterator
+;    iterator-seq           ;clojure seq
+;    first                  ;WindowsPathWithAttributes
+;    .get                   ;WindowsFileAttributes sun.nio.fs.WindowsFileAttributes
+;    .size)                 ;BasicFileAttributes.size()
+
+;However, on Unix with Java 7, I don't get the cached attributes.
+;So I should plan to write my own walker.
+;Try to open a dir
+;cache attributes with files as they are retrieved
+;close dirs when done
+;allow starting point
+;allow max depth
+
 
 
 ; For this multi-arity function, Clojure guesses wrong.
 ; We have to be explicit that the second arg is an empty array.
 (.getPath fs "/" (make-array String 0))
 (.getPath fs "/" (into-array String []))
-(.getPath fs "/" (into-array String ["etc"]))
+;(.getPath fs "/" (into-array String ["etc"]))
 
-(.getPath fs "C:" (into-array String []))
-(.getPath fs "C:" (into-array String ["Users"]))
-(.getPath fs "C:" (into-array String ["Users" "Jacob"]))
+(.getPath fs "C:\\" (into-array String []))
+(.getPath fs "C:\\" (into-array String ["Users"]))
+(.getPath fs "C:\\" (into-array String ["Users" "Jacob"]))
 
 (-> fs
-    (.getPath "C:" (into-array String ["Users"]))
+    (.getPath "C:\\" (into-array String ["Users"]))
     .toFile
     .isDirectory)
-
-
-(Files/readAttributes
-  ufile
-  BasicFileAttributes
-  (into-array LinkOption []))
 
 
 (defn -main
