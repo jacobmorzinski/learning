@@ -1,4 +1,5 @@
 (ns jdirstat.core
+  (:require (org.tobereplaced.nio [file :as nio]))
   (:import (java.io IOException)
            (java.nio.file FileSystems
                           FileSystem
@@ -14,6 +15,10 @@
                                     DosFileAttributes)
            (java.nio.file.spi FileSystemProvider))
   (:gen-class))
+
+(nio/walk-file-tree
+  "C:\\Users\\Jacob\\vimfiles\\backup"
+  (nio/naive-visitor :visit-file (fn [x] (println x))))
 
 (defn getFS
   "Get the default ^java.nio.file.FileSystem"
