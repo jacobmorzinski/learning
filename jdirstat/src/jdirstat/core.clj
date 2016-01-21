@@ -1,24 +1,45 @@
 (ns jdirstat.core
   (:require (org.tobereplaced.nio [file :as nio]))
-  (:import (java.io IOException)
-           (java.nio.file FileSystems
-                          FileSystem
+  (:import (java.nio.file FileSystems
                           Files
-                          FileStore
                           LinkOption
-                          Path
-                          FileVisitor
                           AccessMode
                           AccessDeniedException
-                          NoSuchFileException)
-           (java.nio.file.attribute BasicFileAttributes
-                                    DosFileAttributes)
+                          NoSuchFileException
+                          FileVisitResult)
+           (java.nio.file.attribute DosFileAttributes)
            (java.nio.file.spi FileSystemProvider))
   (:gen-class))
 
 (nio/walk-file-tree
   "C:\\Users\\Jacob\\vimfiles\\backup"
   (nio/naive-visitor :visit-file (fn [x] (println x))))
+
+(nio/walk-file-tree "C:\\Users\\Jacob\\AppData\\Local"
+                    (nio/file-visitor
+                      :visit-file
+                      (fn [f a]
+                        #_ (printf "File: %s%n" f)
+                        FileVisitResult/CONTINUE)
+                      :visit-file-failed
+                      (fn [f exc]
+                        (printf "File failed: %s%n" f)
+                        (cond
+                          (instance? AccessDeniedException exc)
+                          FileVisitResult/CONTINUE
+                          :else
+                          (throw exc)
+                          ))
+                      :pre-visit-directory
+                      (fn [d a]
+                        #_ (printf "Pre-dir: %s%n" d)
+                        FileVisitResult/CONTINUE)
+                      :post-visit-directory
+                      (fn [d exc]
+                        #_ (printf "Post-dir: %s%n" d)
+                        (if exc
+                          (throw exc)
+                          FileVisitResult/CONTINUE))))
 
 (defn getFS
   "Get the default ^java.nio.file.FileSystem"
