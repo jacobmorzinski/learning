@@ -26,6 +26,8 @@
 
 (def ^Path my-path (nio.file/path (System/getenv "LOCALAPPDATA")))
 
+(def ^Path my-temp (System/getProperty "java.io.tmpdir"))
+
 ; Components of Path p
 ; The root, if it exists, is not part of the iterator
 ; and needs to be handled separately.
@@ -48,6 +50,8 @@
                            p
                            "*"
                            LinkOption/NOFOLLOW_LINKS))))))
+
+
 
 #_(updaterefwithpath resultref (nio.file/absolute-path ""))
 
@@ -80,6 +84,43 @@
 (defn testwalk
   [path fv]
   (nio.file/walk-file-tree path fv))
+
+
+
+(defn updaterefwithgivenattrs [r p a]
+  (dosync (alter r
+                 assoc-in
+                 (path->strcomps p)
+                 a)))
+
+(def fv2
+  (nio.file/file-visitor
+    :visit-file
+    (fn [f a]
+      (println "f is " f)
+      (println "a is " a)
+      (updaterefwithgivenattrs resultref f a)
+      FileVisitResult/CONTINUE)
+    :visit-file-failed
+    (fn [f exc]
+      (printf "File failed: %s%n" f)
+      (cond
+        (instance? AccessDeniedException exc)
+        FileVisitResult/CONTINUE
+        :else
+        (throw exc)
+        ))
+    :pre-visit-directory
+    (fn [d a]
+      #_(printf "Pre-dir: %s%n" d)
+      FileVisitResult/CONTINUE)
+    :post-visit-directory
+    (fn [d exc]
+      #_(printf "Post-dir: %s%n" d)
+      (if exc
+        (throw exc)
+        FileVisitResult/CONTINUE))))
+
 
 #_ (testwalk (nio.file/path "C:\\Users\\Jacob\\target") fv)
 #_ (clojure.walk/postwalk-demo  @resultref)
