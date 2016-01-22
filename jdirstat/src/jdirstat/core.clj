@@ -26,11 +26,36 @@
 
 (def ^Path my-path (nio.file/path (System/getenv "LOCALAPPDATA")))
 
+; Components of Path p
+; The root, if it exists, is not part of the iterator
+; and needs to be handled separately.
+(defn path->strcomps
+  [^Path p]
+  (let [comps (-> p .iterator iterator-seq)]
+    (if-let [root (nio.file/root p)]
+      (map str (conj comps root))
+      (map str comps))))
+
+(def resultref (ref {}))
+
+(defn updaterefwithpath [r p]
+  (dosync (alter r
+                 assoc-in
+                 (path->strcomps p)
+                 (clojure.walk/keywordize-keys
+                   (into {}
+                         (nio.file/read-attributes
+                           p
+                           "*"
+                           LinkOption/NOFOLLOW_LINKS))))))
+
+#_(updaterefwithpath resultref (nio.file/absolute-path ""))
+
 (def fv
   (nio.file/file-visitor
     :visit-file
     (fn [f a]
-      #_(printf "File: %s%n" f)
+      (updaterefwithpath resultref f)
       FileVisitResult/CONTINUE)
     :visit-file-failed
     (fn [f exc]
@@ -56,6 +81,10 @@
   [path fv]
   (nio.file/walk-file-tree path fv))
 
+#_ (testwalk (nio.file/path "C:\\Users\\Jacob\\target") fv)
+#_ (clojure.walk/postwalk-demo  @resultref)
+
+
 
 ; Testing core.async
 #_ (def in (chan 1))
@@ -73,6 +102,86 @@
 ;=> false
 
 #_ (thread (testwalk my-path fv))
+
+
+;(def resultref (ref {}))
+;=> #'jdirstat.core/resultref
+;(dosync
+;  (alter resultref
+;         assoc (str my-path)
+;         (nio.file/read-attributes my-path "basic:*")))
+;=>
+;{"C:\\Users\\Jacob\\AppData\\Local" {"lastAccessTime" #<FileTime 2016-01-20T05:47:00.830189Z>,
+;                                     "lastModifiedTime" #<FileTime 2016-01-20T05:47:00.830189Z>,
+;                                     "size" 16384,
+;                                     "creationTime" #<FileTime 2015-11-28T02:42:21.387966Z>,
+;                                     "isSymbolicLink" false,
+;                                     "isRegularFile" false,
+;                                     "fileKey" nil,
+;                                     "isOther" false,
+;                                     "isDirectory" true}}
+
+
+;{(str my-path)
+; (nio.file/read-attributes my-path "*" LinkOption/NOFOLLOW_LINKS)}
+;=>
+;{"C:\\Users\\Jacob\\AppData\\Local" {"lastAccessTime" #<FileTime 2016-01-20T05:47:00.830189Z>,
+;                                     "lastModifiedTime" #<FileTime 2016-01-20T05:47:00.830189Z>,
+;                                     "size" 16384,
+;                                     "creationTime" #<FileTime 2015-11-28T02:42:21.387966Z>,
+;                                     "isSymbolicLink" false,
+;                                     "isRegularFile" false,
+;                                     "fileKey" nil,
+;                                     "isOther" false,
+;                                     "isDirectory" true}}
+
+;(apply list
+;       (str (nio.file/root my-path))
+;       (for [i (range (.getNameCount my-path))]
+;         (str (.getName my-path i))))
+;=> ("C:\\" "Users" "Jacob" "AppData" "Local")
+
+
+;(->> my-path
+;     .iterator
+;     iterator-seq
+;     (map str))
+;=> ("Users" "Jacob" "AppData" "Local")
+;(def resultref {})
+;=> #'jdirstat.core/resultref
+;(def my-tree (->> my-path
+;                  .iterator
+;                  iterator-seq
+;                  (map str)))
+;=> #'jdirstat.core/my-tree
+;(assoc-in resultref my-tree "New")
+;=> {"Users" {"Jacob" {"AppData" {"Local" "New"}}}}
+
+
+
+
+
+#_ (dosync (alter resultref
+               assoc-in (path->strcomps my-path)
+               "Nick"))
+
+;(def resultref (ref {}))
+;=> #'jdirstat.core/resultref
+;(dosync (alter resultref
+;               assoc-in (path->strcomps my-path)
+;               (clojure.walk/keywordize-keys (into {} (nio.file/read-attributes my-path "*" LinkOption/NOFOLLOW_LINKS)))))
+;=>
+;{"C:\\" {"Users" {"Jacob" {"AppData" {"Local" {:creationTime #<FileTime 2015-11-28T02:42:21.387966Z>,
+;                                               :isSymbolicLink false,
+;                                               :isOther false,
+;                                               :lastAccessTime #<FileTime 2016-01-20T05:47:00.830189Z>,
+;                                               :isRegularFile false,
+;                                               :size 16384,
+;                                               :lastModifiedTime #<FileTime 2016-01-20T05:47:00.830189Z>,
+;                                               :fileKey nil,
+;                                               :isDirectory true}}}}}}
+
+
 
 
 (defn ^FileSystem getFS
