@@ -4,6 +4,15 @@ import java.nio.file.Path
 import java.nio.file.Paths
 
 /*
+ * Based on a gist
+ *  https://gist.github.com/peterkir/1df3f0bf8508d8836101
+ * from an answer
+ *  http://stackoverflow.com/a/29699473/3599738
+ * to a StackOverflow post "Determine whether a file is a junction (in Windows) or not?"
+ *  http://stackoverflow.com/questions/13733275/determine-whether-a-file-is-a-junction-in-windows-or-not
+ */
+
+/*
  *
  * prepare the directory from cmd with admin rights
  *
