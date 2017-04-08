@@ -40,20 +40,24 @@
 (defn filt2
   "Input: a map with a seen-once ordered set and a seen-more set
   and the next unit to be examined
-  Output: a map with updated seen-once set and seen-more set"
+  Output: a map with updated seen-once ordered set and seen-more set"
 
 ; produce an identity value for clojure.core.reducers/reduce
   ([] 
   {:seen-once (ordered-set) :seen-more #{}})
 
-  ([state-map in]
-  (let [seen-once (:seen-once state-map)
-        seen-more (:seen-more state-map)
-        new-once (cond (some #{in} seen-more) seen-once
-                    (some #{in} seen-once) (disj seen-once in)
-                    true (conj seen-once in))
-        new-more (cond (some #{in} seen-once) (conj seen-more in)
-                    true seen-more)]
+; finalizer
+  ([result]
+    (first (:seen-once result)))
+
+  ([result input]
+  (let [{old-once :seen-once
+        old-more :seen-more} result
+        new-once (cond (some #{input} old-more) old-once
+                        (some #{input} old-once) (disj old-once input)
+                        true (conj old-once input))
+        new-more (cond (some #{input} old-once) (conj old-more input)
+                        true old-more)]
     {:seen-once new-once
     :seen-more new-more})))
 
