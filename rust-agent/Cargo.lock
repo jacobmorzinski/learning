@@ -1,0 +1,4 @@
+[root]
+name = "rust-agent"
+version = "0.1.0"
+
