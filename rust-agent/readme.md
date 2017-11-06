@@ -17,4 +17,7 @@ It is complicated; the pseudo-code pasted in the 2014 rust-lang issue no long wo
 
 ## Additional
 
-Learn from https://github.com/Muterra/py_daemoniker
+Learn from:
+
+* https://github.com/Muterra/py_daemoniker
+* https://github.com/knsd/daemonize/
