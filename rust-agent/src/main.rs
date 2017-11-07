@@ -5,7 +5,7 @@ fn main() {
     let args = env::args();
     if args.len() == 1 {
         let mut child = Command::new("date.exe")
-                            .arg("-h")
+                            .arg("--rfc-3339").arg("seconds")
                             .spawn()
                             .expect("error starting child");
         println!("child: {}", child.id());
